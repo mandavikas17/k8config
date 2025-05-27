@@ -47,8 +47,8 @@ data "aws_ami" "amazon_linux_2" {
 resource "aws_instance" "minikube_ec2" {
   ami                         = data.aws_ami.amazon_linux_2.id
   instance_type               = "t3.medium"
-  key_name                    = ansible
-  vpc_security_group_ids      = [aws_security_group.allow_ssh_http.id]
+  key_name                    = "ansible"
+  security_groups        = [aws_security_group.allow_ssh_http.name]
   associate_public_ip_address = true
 
   user_data = file("userdata.sh")
