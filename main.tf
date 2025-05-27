@@ -37,7 +37,7 @@ resource "aws_security_group" "minikube_sg" {
 
 resource "aws_instance" "minikube_ec2" {
   ami                    = "ami-00f34bf9aeacdf007" 
-  instance_type          = "t2.medium"
+  instance_type          = "t3.medium"
   key_name               = "ansible"
   security_groups        = [aws_security_group.minikube_sg.name]
   associate_public_ip_address = true
