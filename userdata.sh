@@ -57,6 +57,7 @@ metadata:
   name: harness-delegate-ng
 
 ---
+
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -75,7 +76,7 @@ roleRef:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: kubernetes-delegate-account-token
+  name: vikas-account-token
   namespace: harness-delegate-ng
 type: Opaque
 data:
@@ -90,19 +91,19 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    harness.io/name: kubernetes-delegate
-  name: kubernetes-delegate
+    harness.io/name: vikas
+  name: vikas
   namespace: harness-delegate-ng
 spec:
   replicas: 1
   minReadySeconds: 120
   selector:
     matchLabels:
-      harness.io/name: kubernetes-delegate
+      harness.io/name: vikas
   template:
     metadata:
       labels:
-        harness.io/name: kubernetes-delegate
+        harness.io/name: vikas
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "3460"
@@ -143,7 +144,7 @@ spec:
           failureThreshold: 15
         envFrom:
         - secretRef:
-            name: kubernetes-delegate-account-token
+            name: vikas-account-token
         env:
         - name: JAVA_OPTS
           value: "-Xms64M"
@@ -154,7 +155,7 @@ spec:
         - name: DEPLOY_MODE
           value: KUBERNETES
         - name: DELEGATE_NAME
-          value: kubernetes-delegate
+          value: vikas
         - name: DELEGATE_TYPE
           value: "KUBERNETES"
         - name: DELEGATE_NAMESPACE
@@ -181,15 +182,15 @@ spec:
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-   name: kubernetes-delegate-hpa
+   name: vikas-hpa
    namespace: harness-delegate-ng
    labels:
-       harness.io/name: kubernetes-delegate
+       harness.io/name: vikas
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: kubernetes-delegate
+    name: vikas
   minReplicas: 1
   maxReplicas: 1
   metrics:
@@ -226,7 +227,7 @@ rules:
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: kubernetes-delegate-upgrader-cronjob
+  name: vikas-upgrader-cronjob
   namespace: harness-delegate-ng
 subjects:
   - kind: ServiceAccount
@@ -250,7 +251,7 @@ metadata:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: kubernetes-delegate-upgrader-token
+  name: vikas-upgrader-token
   namespace: harness-delegate-ng
 type: Opaque
 data:
@@ -261,13 +262,13 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: kubernetes-delegate-upgrader-config
+  name: vikas-upgrader-config
   namespace: harness-delegate-ng
 data:
   config.yaml: |
     mode: Delegate
     dryRun: false
-    workloadName: kubernetes-delegate
+    workloadName: vikas
     namespace: harness-delegate-ng
     containerName: delegate
     delegateConfig:
@@ -280,8 +281,8 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   labels:
-    harness.io/name: kubernetes-delegate-upgrader-job
-  name: kubernetes-delegate-upgrader-job
+    harness.io/name: vikas-upgrader-job
+  name: vikas-upgrader-job
   namespace: harness-delegate-ng
 spec:
   schedule: "0 */1 * * *"
@@ -299,14 +300,15 @@ spec:
             imagePullPolicy: Always
             envFrom:
             - secretRef:
-                name: kubernetes-delegate-upgrader-token
+                name: vikas-upgrader-token
             volumeMounts:
               - name: config-volume
                 mountPath: /etc/config
           volumes:
             - name: config-volume
               configMap:
-                name: kubernetes-delegate-upgrader-config
+                name: vikas-upgrader-config
+
       EOF
 
     kubectl apply -f /home/ec2-user/delegate.yaml
