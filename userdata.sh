@@ -52,7 +52,7 @@ sudo systemctl start minikube
 
 sleep 180
 
-cat <<EOF > ./delegate.yam 
+cat <<EOF > ./delegate.yaml 
 apiVersion: v1
 kind: Namespace
 metadata:
