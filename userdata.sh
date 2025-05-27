@@ -1,18 +1,16 @@
 #!/bin/bash
 set -xe
 
+# Update system and install dependencies
 sudo yum update -y
+sudo yum install -y git conntrack
 
-# Install git
-sudo yum install git -y
-
-# Install Docker on Amazon Linux 2
+# Install Docker
 sudo yum install -y docker
 sudo amazon-linux-extras enable docker
 sudo systemctl start docker
 sudo systemctl enable docker
 
-# Add ec2-user to docker group
 sudo usermod -aG docker ec2-user
 
 # Install kubectl
@@ -21,23 +19,39 @@ chmod +x kubectl
 sudo mv kubectl /usr/local/bin/
 sudo chown ec2-user:ec2-user /usr/local/bin/kubectl
 
-# Install conntrack (required for minikube)
-sudo yum install -y conntrack
-
 # Install minikube
 curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
 chmod +x minikube
 sudo mv minikube /usr/local/bin/
 sudo chown ec2-user:ec2-user /usr/local/bin/minikube
 
-# Add /usr/local/bin to ec2-user PATH if not present
+# Ensure PATH for ec2-user includes /usr/local/bin
 if ! grep -q '/usr/local/bin' /home/ec2-user/.bash_profile; then
   echo 'export PATH=$PATH:/usr/local/bin' >> /home/ec2-user/.bash_profile
   sudo chown ec2-user:ec2-user /home/ec2-user/.bash_profile
 fi
 
-# Start minikube with none driver as ec2-user
-sudo -i -u ec2-user bash << EOF
-export PATH=\$PATH:/usr/local/bin
-minikube start
+# Create systemd service file for minikube
+sudo tee /etc/systemd/system/minikube.service > /dev/null <<EOF
+[Unit]
+Description=Minikube Kubernetes
+After=docker.service
+Requires=docker.service
+
+[Service]
+User=ec2-user
+Group=ec2-user
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+ExecStart=/usr/local/bin/minikube start --driver=none
+ExecStop=/usr/local/bin/minikube stop
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
 EOF
+
+# Reload systemd, enable and start minikube service
+sudo systemctl daemon-reload
+sudo systemctl enable minikube
+sudo systemctl start minikube
