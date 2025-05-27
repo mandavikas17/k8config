@@ -1,53 +1,43 @@
 #!/bin/bash
 set -xe
 
-# Update packages
-yum update -y
+sudo yum update -y
 
-# Install dependencies
-yum install -y git curl wget conntrack
+# Install git
+sudo yum install git -y
 
-# Enable and install Docker
-amazon-linux-extras enable docker
-yum install -y docker
-systemctl enable docker
-systemctl start docker
-usermod -aG docker ec2-user
+# Install Docker on Amazon Linux 2
+sudo yum install -y docker
+sudo amazon-linux-extras enable docker
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# Add ec2-user to docker group
+sudo usermod -aG docker ec2-user
 
 # Install kubectl
-curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
 chmod +x kubectl
-mv kubectl /usr/local/bin/
-chown ec2-user:ec2-user /usr/local/bin/kubectl
+sudo mv kubectl /usr/local/bin/
+sudo chown ec2-user:ec2-user /usr/local/bin/kubectl
 
-# Install Minikube
+# Install conntrack (required for minikube)
+sudo yum install -y conntrack
+
+# Install minikube
 curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
 chmod +x minikube
-mv minikube /usr/local/bin/
-chown ec2-user:ec2-user /usr/local/bin/minikube
+sudo mv minikube /usr/local/bin/
+sudo chown ec2-user:ec2-user /usr/local/bin/minikube
 
-# Fix PATH
-echo 'export PATH=$PATH:/usr/local/bin' >> /home/ec2-user/.bash_profile
-chown ec2-user:ec2-user /home/ec2-user/.bash_profile
+# Add /usr/local/bin to ec2-user PATH if not present
+if ! grep -q '/usr/local/bin' /home/ec2-user/.bash_profile; then
+  echo 'export PATH=$PATH:/usr/local/bin' >> /home/ec2-user/.bash_profile
+  sudo chown ec2-user:ec2-user /home/ec2-user/.bash_profile
+fi
 
-# Create systemd service to auto-start Minikube as ec2-user
-cat <<EOF > /etc/systemd/system/minikube-start.service
-[Unit]
-Description=Start Minikube
-After=docker.service
-Requires=docker.service
-
-[Service]
-Type=oneshot
-User=ec2-user
-ExecStart=/usr/local/bin/minikube start --driver=none
-RemainAfterExit=yes
-
-[Install]
-WantedBy=multi-user.target
+# Start minikube with none driver as ec2-user
+sudo -i -u ec2-user bash << EOF
+export PATH=\$PATH:/usr/local/bin
+minikube start
 EOF
-
-# Enable the service to run on boot
-systemctl daemon-reexec
-systemctl daemon-reload
-systemctl enable minikube-start.service
