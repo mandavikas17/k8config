@@ -42,7 +42,7 @@ Requires=docker.service
 User=ec2-user
 Group=ec2-user
 Environment=PATH=/usr/local/bin:/usr/bin:/bin
-ExecStart=/usr/local/bin/minikube start --force
+ExecStart=/usr/local/bin/minikube start --driver=none
 EOF
 
 # Reload systemd, enable and start minikube service
