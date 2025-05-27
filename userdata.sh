@@ -43,15 +43,9 @@ User=ec2-user
 Group=ec2-user
 Environment=PATH=/usr/local/bin:/usr/bin:/bin
 ExecStart=/usr/local/bin/minikube start --force
-ExecStop=/usr/local/bin/minikube stop
-Restart=always
-RestartSec=10
-
-[Install]
-WantedBy=multi-user.target
 EOF
 
 # Reload systemd, enable and start minikube service
 sudo systemctl daemon-reload
 sudo systemctl enable minikube
-sudo systemctl start minikube
+sudo minikube start --force
