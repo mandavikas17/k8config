@@ -50,7 +50,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable minikube
 sudo systemctl start minikube
 
-cat <<EOF > delegate.yaml 
+cat <<EOF > /home/ec2-user/delegate.yaml 
 apiVersion: v1
 kind: Namespace
 metadata:
