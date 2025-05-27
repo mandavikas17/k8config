@@ -50,16 +50,13 @@ sudo systemctl daemon-reload
 sudo systemctl enable minikube
 sudo systemctl start minikube
 
-sleep 180
-
-cat <<EOF > ./delegate.yaml 
+cat <<EOF > delegate.yaml 
 apiVersion: v1
 kind: Namespace
 metadata:
   name: harness-delegate-ng
 
 ---
-
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
