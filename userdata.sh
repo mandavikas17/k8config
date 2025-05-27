@@ -1,5 +1,5 @@
 #!/bin/bash
-set -xe
+set +xe
 
 # Update system
 sudo yum update -y
