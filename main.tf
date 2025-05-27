@@ -36,7 +36,7 @@ resource "aws_security_group" "minikube_sg" {
 }
 
 resource "aws_instance" "minikube_ec2" {
-  ami                    = "ami-0e58b56aa4d64231b" 
+  ami                    = "ami-00f34bf9aeacdf007" 
   instance_type          = "t2.medium"
   key_name               = "ansible"
   security_groups        = [aws_security_group.minikube_sg.name]
