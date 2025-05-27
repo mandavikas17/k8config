@@ -48,4 +48,4 @@ EOF
 # Reload systemd, enable and start minikube service
 sudo systemctl daemon-reload
 sudo systemctl enable minikube
-sudo minikube start --force
+sudo systemctl start minikube
