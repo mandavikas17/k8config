@@ -309,4 +309,4 @@ spec:
                 name: kubernetes-delegate-upgrader-config
       EOF
 
-    kubectl apply -f delegate.yaml
+    kubectl apply -f /home/ec2-user/delegate.yaml
