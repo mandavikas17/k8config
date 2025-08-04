@@ -25,10 +25,11 @@ kind: Service
 metadata:
   name: java-app-service
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: java-app
   ports:
   - port: 8080             # Service port
     targetPort: 8080       # Container port
-    nodePort: 31111        # External accessible port on each node
+    protocol: "TCP"
+          # External accessible port on each node
