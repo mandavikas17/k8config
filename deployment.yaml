@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: java-app
-        image: mandavikas17/webapp:2.0
+        image: mandavikas17/demo:27
         ports:
         - containerPort: 8080
         # Ensure your container runs the app server and WAR on 8080
